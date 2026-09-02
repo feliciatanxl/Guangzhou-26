@@ -1,35 +1,52 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
   ArrowRight,
+  Building2,
   CalendarDays,
-  ChevronRight,
-  CirclePlus,
+  CheckCircle2,
   Clock3,
+  Coffee,
+  Compass,
   ExternalLink,
-  Heart,
+  Landmark,
+  Layers,
   MapPin,
   Navigation,
   Plane,
-  Plus,
-  Sparkles,
-  Ticket,
-  Trash2,
+  ShoppingBag,
+  Store,
   Utensils,
 } from 'lucide-react';
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+
+type StopCategory =
+  | 'Flight'
+  | 'Hotel'
+  | 'Shopping'
+  | 'Dining'
+  | 'Cafe'
+  | 'Bakery'
+  | 'Culture'
+  | 'Landmark'
+  | 'Excursion'
+  | 'Transfer';
 
 type Stop = {
   time: string;
@@ -37,231 +54,258 @@ type Stop = {
   note: string;
   place: string;
   tone: 'jade' | 'red' | 'gold';
+  tag: string;
+  category: StopCategory;
+  xhsUrl: string;
 };
 
 type Day = {
   date: string;
   weekday: string;
+  dayNumber: number;
   title: string;
   subtitle: string;
+  area: string;
   pace: string;
   stops: Stop[];
-};
-
-type Inspiration = {
-  id: string;
-  title: string;
-  note: string;
-  category: string;
-  image: string;
-  xhsUrl: string;
-  amapPlace: string;
-  custom?: boolean;
 };
 
 const days: Day[] = [
   {
     date: '17',
     weekday: 'Thu',
-    title: 'Land, reset & stay nearby',
-    subtitle: 'A low-pressure arrival day based around your Beijing Road hotel.',
-    pace: 'Gentle · overnight flight',
+    dayNumber: 1,
+    title: 'Arrival & Haizhu',
+    subtitle:
+      'Flight arrival, hotel check-in, Beijing Road shopping, Wanguo Outlets, and famous shoe waffles in Haizhu.',
+    area: 'Haizhu & Yuexiu',
+    pace: 'Arrival & Haizhu · 5 stops',
     stops: [
       {
         time: '08:55',
-        title: 'Land at Guangzhou Baiyun Airport',
-        note: 'CX982 arrives from Hong Kong. Clear arrival formalities, then head towards Gongyuanqian.',
+        title: 'Flight CX982 Arrival',
+        note: 'Land at Guangzhou Baiyun International Airport (CAN) on flight CX982 from Hong Kong. Clear immigration and collect bags before heading into the city.',
         place: '广州白云国际机场',
         tone: 'jade',
+        tag: 'Airport',
+        category: 'Flight',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=%E7%99%BD%E4%BA%91%E6%9C%BA%E5%9C%BA%E5%85%A5%E5%A2%83',
       },
       {
-        time: '10:45',
-        title: 'Bag drop at Xi Yue Hotel',
-        note: 'Ask about early check-in; otherwise leave the bags and keep the morning flexible after the overnight flights.',
+        time: '11:00',
+        title: 'Xi Yue Hotel Check-in / Bag Drop',
+        note: 'Check in or leave bags at Xi Yue Hotel near Gongyuanqian Metro Station and Beijing Road to stay hands-free.',
         place: '禧粤YUE HOTEL 广州北京路步行街公园前地铁站店',
         tone: 'gold',
+        tag: 'Base',
+        category: 'Hotel',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=%E7%A6%A7%E7%B2%A4YUE+HOTEL%E5%85%AC%E5%9B%AD%E5%89%8D',
+      },
+      {
+        time: '13:00',
+        title: 'Joy&Season (Beijing Road Tianhecheng)',
+        note: 'Browse cute lifestyle accessories, stationery, and creative goods at Joy&Season inside Beijing Road Tianhecheng (Teemall).',
+        place: '北京路天河城',
+        tone: 'red',
+        tag: 'Shopping',
+        category: 'Shopping',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=Joy%26Season+%E5%8C%97%E4%BA%AC%E8%B7%AF%E5%A4%A9%E6%B2%B3%E5%9F%8E',
       },
       {
         time: '15:30',
-        title: 'Beijing Road & Dafo Temple',
-        note: 'An easy first wander close to the hotel, with plenty of food choices and no long cross-city journey.',
-        place: '北京路步行街',
+        title: 'Wanguo Outlets (万国奥特莱斯)',
+        note: 'Cross the Pearl River into Haizhu District for major sports brands and discounted shopping across multiple outlet floors.',
+        place: '万国奥特莱斯',
+        tone: 'gold',
+        tag: 'Outlets',
+        category: 'Shopping',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=%E4%B8%87%E5%9B%BD%E5%A5%A5%E7%89%B9%E8%8E%B1%E6%96%AF+%E6%B5%B7%E7%8F%A0',
+      },
+      {
+        time: '18:00',
+        title: '富贵食饭公司 · Shoe Waffle (R&F Haizhu City)',
+        note: 'Dine at 富贵食饭公司 in R&F Haizhu City (富力海珠城). Must-order: their viral signature shoe waffle (鞋底华夫饼) and classic cha chaan teng dishes.',
+        place: '富贵食饭公司(富力海珠城店)',
         tone: 'red',
+        tag: 'Viral Food',
+        category: 'Dining',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=%E5%AF%8C%E8%B4%B5%E9%A3%9F%E9%A5%AD%E5%85%AC%E5%8F%B8+%E9%9E%8B%E5%BA%95%E5%8D%8E%E5%A4%AB%E9%A5%BC',
       },
     ],
   },
   {
     date: '18',
     weekday: 'Fri',
-    title: 'Old Guangzhou, slowly',
-    subtitle: 'Carved halls, arcades and leafy riverfront lanes.',
-    pace: 'Full · 3 stops',
+    dayNumber: 2,
+    title: 'Liwan & Xihua',
+    subtitle:
+      'Historic Lingnan alleys, creative boutique hopping in Yongqing Fang, specialty brew at Simple 闪咖啡, and fresh bear buns.',
+    area: 'Liwan & Yuexiu',
+    pace: 'Heritage & Cafe · 3 stops',
     stops: [
       {
-        time: '09:30',
-        title: 'Chen Clan Ancestral Hall',
-        note: 'Go early for quieter courtyards and the roofline details.',
-        place: '陈家祠',
-        tone: 'gold',
-      },
-      {
-        time: '12:30',
-        title: 'Yong Qing Fang & Enning Road',
-        note: 'Lunch, heritage lanes and a slow browse through small local shops.',
+        time: '10:00',
+        title: 'Yongqing Fang (DIMOND玩意制造, picocici, 一桌广州·记忆商店)',
+        note: 'Stroll through historic Xiguan architecture and explore trending creative shops: DIMOND玩意制造 (toys & design), picocici (cute lifestyle), and 一桌广州·记忆商店 (Guangzhou memory souvenirs).',
         place: '永庆坊',
-        tone: 'red',
+        tone: 'jade',
+        tag: 'Heritage & Design',
+        category: 'Culture',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=%E6%B0%B8%E5%BA%86%E5%9D%8A+DIMOND+picocici+%E4%B8%80%E6%A1%8C%E5%B9%BF%E5%B7%9E',
       },
       {
-        time: '17:00',
-        title: 'Shamian Island',
-        note: 'Tree-lined evening walk before dinner in Liwan.',
-        place: '沙面岛',
-        tone: 'jade',
+        time: '14:00',
+        title: 'Simple 闪咖啡 (Xihua Road)',
+        note: 'Specialty coffee break with signature roasted brews at Simple 闪咖啡 along iconic foodie haven Xihua Road (西华路).',
+        place: 'Simple闪咖啡(西华路店)',
+        tone: 'gold',
+        tag: 'Specialty Coffee',
+        category: 'Cafe',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=Simple%E9%97%AA%E5%92%96%E5%95%A1+%E8%A5%BF%E5%8D%8E%E8%B7%AF',
+      },
+      {
+        time: '16:30',
+        title: 'Bear Bun Bakery (Guangzhou Railway Station)',
+        note: 'Pick up freshly baked artisanal breads, adorable signature bear buns, and sweet pastries near Guangzhou Railway Station.',
+        place: 'Bear Bun Bakery',
+        tone: 'red',
+        tag: 'Bakery Treats',
+        category: 'Bakery',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=Bear+Bun+Bakery+%E5%B9%BF%E5%B7%9E',
       },
     ],
   },
   {
     date: '19',
     weekday: 'Sat',
-    title: 'Parks, temples & Beijing Road',
-    subtitle: 'History in the morning, bright city energy after dark.',
-    pace: 'Balanced · 3 stops',
+    dayNumber: 3,
+    title: 'Dongshankou & Tianhe',
+    subtitle:
+      'Trendy Republican-era red-brick villas in Dongshankou, premier luxury retail at TaiKoo Hui, and illuminated evening views of Canton Tower.',
+    area: 'Yuexiu & Tianhe',
+    pace: 'City Walk & Skyline · 3 stops',
     stops: [
       {
-        time: '09:00',
-        title: 'Yuexiu Park',
-        note: 'Start cool and unhurried around the Five Rams sculpture.',
-        place: '越秀公园',
+        time: '10:30',
+        title: 'Dongshankou (VITAL - 邦邦的日常, Five Mate)',
+        note: 'Wander tree-lined historical mansion lanes, visiting curated lifestyle haven VITAL - 邦邦的日常 and street fashion boutique Five Mate.',
+        place: '东山口',
         tone: 'jade',
+        tag: 'Indie Fashion & Cafe',
+        category: 'Culture',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=%E4%B8%9C%E5%B1%B1%E5%8F%A3+VITAL%E9%82%A6%E9%82%A6%E7%9A%84%E6%97%A5%E5%B8%B8+Five+Mate',
       },
       {
-        time: '12:00',
-        title: 'Guangxiao Temple',
-        note: 'A calm historic stop with lunch nearby.',
-        place: '光孝寺',
+        time: '14:30',
+        title: 'TaiKoo Hui (太古汇)',
+        note: 'Premier luxury shopping mall experience in Tianhe CBD featuring top international fashion houses, Fang Suo Commune bookstore, and rooftop cafes.',
+        place: '太古汇',
         tone: 'gold',
+        tag: 'Luxury Retail',
+        category: 'Shopping',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=%E5%B9%BF%E5%B7%9E%E5%A4%AA%E5%8F%A4%E6%B1%87',
       },
       {
-        time: '17:30',
-        title: 'Beijing Road',
-        note: 'See the preserved road layers, snack and browse after sunset.',
-        place: '北京路步行街',
+        time: '18:30',
+        title: 'Canton Tower (广州塔)',
+        note: 'Sunset and nighttime illumination across the Pearl River, Canton Tower, and Huacheng Square skyline.',
+        place: '广州塔',
         tone: 'red',
+        tag: 'Iconic Landmark',
+        category: 'Landmark',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=%E5%B9%BF%E5%B7%9E%E5%A1%94%E5%A4%9C%E6%99%AF%E6%9C%BA%E4%BD%8D',
       },
     ],
   },
   {
     date: '20',
     weekday: 'Sun',
-    title: 'Choose-your-own adventure',
-    subtitle: 'A big day for wildlife or a restorative mountain reset.',
-    pace: 'Flexible · 2 options',
+    dayNumber: 4,
+    title: 'Baiyun & Conghua',
+    subtitle:
+      'Suburban excursion to 8号仓 outlet village in Conghua via Metro Line 14, followed by a lakeside LBXX hotpot feast.',
+    area: 'Conghua & Baiyun',
+    pace: 'Outlets & Hotpot · 2 stops',
     stops: [
       {
-        time: '08:30',
-        title: 'Option A · Chimelong Safari Park',
-        note: 'Allow the full day, wear good shoes and pre-book tickets.',
-        place: '长隆野生动物世界',
-        tone: 'red',
+        time: '10:00',
+        title: 'PO · 8号仓流溪河奥莱小镇 (Metro Line 14 Shengang Exit B)',
+        note: 'European-style open-air outlet park in Conghua with the famous pink waterfall and massive brand discounts. Direct access right outside Metro Line 14 Shengang Station Exit B (神岗站B口).',
+        place: '8号仓流溪河奥莱小镇',
+        tone: 'jade',
+        tag: 'Outlet Village',
+        category: 'Excursion',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=8%E5%8F%B7%E4%BB%93%E6%B5%81%E6%BA%AA%E6%B2%B3%E5%A5%A5%E8%8E%B1%E5%B0%8F%E9%95%87',
       },
       {
-        time: '09:00',
-        title: 'Option B · Baiyun Mountain',
-        note: 'A greener, lower-cost day with city views and an early finish.',
-        place: '白云山风景名胜区',
-        tone: 'jade',
+        time: '17:30',
+        title: 'LBXX Hotpot (Baiyun Lake Jinbo Tiandi 5th Floor)',
+        note: 'Hearty dinner feast at LBXX hotpot on the 5th floor of Baiyun Lake Jinbo Tiandi (白云湖金铂天地5楼) after returning from Conghua.',
+        place: '白云湖金铂天地',
+        tone: 'red',
+        tag: 'Hotpot Feast',
+        category: 'Dining',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=LBXX%E7%81%AB%E9%94%85+%E7%99%BD%E4%BA%91%E6%B9%96%E9%87%91%E9%93%82%E5%A4%A9%E5%9C%B0',
       },
     ],
   },
   {
     date: '21',
     weekday: 'Mon',
-    title: 'Nearby favourites & late flight',
-    subtitle: 'Keep the final day close to the hotel before CX989.',
-    pace: 'Light · flight at 22:20',
+    dayNumber: 5,
+    title: 'Departure',
+    subtitle:
+      'Relaxed morning waffles and coffee at M&M / Waffles Daily, luggage collection, and evening departure on CX989.',
+    area: 'Yuexiu & Airport',
+    pace: 'Departure · Flight CX989',
     stops: [
       {
-        time: '09:30',
-        title: 'Check out & leave bags',
-        note: 'Keep luggage with the hotel so the last day stays hands-free.',
-        place: '禧粤YUE HOTEL 广州北京路步行街公园前地铁站店',
+        time: '10:30',
+        title: 'Free Time for M&M / Waffles Daily',
+        note: 'Unhurried morning enjoying fresh waffles and specialty drinks at Waffles Daily / M&M, plus final souvenir shopping near Beijing Road.',
+        place: 'Waffles Daily',
         tone: 'gold',
+        tag: 'Brunch & Waffles',
+        category: 'Cafe',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=Waffles+Daily+%E5%B9%BF%E5%B7%9E',
       },
       {
-        time: '11:00',
-        title: 'Final central-city slot',
-        note: 'Reserve this for nearby XHS food or shopping pins around Beijing Road, Gongyuanqian or Yuexiu.',
-        place: '公园前地铁站',
+        time: '18:00',
+        title: 'Collect Luggage at Xi Yue Hotel & Airport Transfer',
+        note: 'Retrieve bags from Xi Yue Hotel and take Metro Line 2 or taxi to Guangzhou Baiyun International Airport with comfortable time buffer.',
+        place: '禧粤YUE HOTEL 广州北京路步行街公园前地铁站店',
         tone: 'jade',
+        tag: 'Luggage & Transit',
+        category: 'Transfer',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=%E7%A6%A7%E7%B2%A4YUE+HOTEL%E5%85%AC%E5%9B%AD%E5%89%8D',
       },
       {
-        time: '17:30',
-        title: 'Collect bags & early dinner',
-        note: 'Eat near the hotel, collect luggage and check live traffic before leaving.',
-        place: '北京路步行街',
-        tone: 'red',
-      },
-      {
-        time: '18:30',
-        title: 'Leave for Baiyun Airport',
-        note: 'Planning target for the 22:20 CX989 flight. Reconfirm airline check-in guidance and live Amap travel time that day.',
+        time: '22:20',
+        title: 'Flight CX989 Departure',
+        note: 'Board Cathay Pacific flight CX989 departing CAN (22:20) for Hong Kong (23:40) with onward overnight connection CX659 to Singapore.',
         place: '广州白云国际机场',
         tone: 'red',
+        tag: 'Return Flight',
+        category: 'Flight',
+        xhsUrl:
+          'https://www.xiaohongshu.com/search_result?keyword=%E7%99%BD%E4%BA%91%E6%9C%BA%E5%9C%BA%E5%87%BA%E5%A2%83',
       },
     ],
-  },
-  {
-    date: '22',
-    weekday: 'Tue',
-    title: 'Hong Kong connection → home',
-    subtitle: 'The Guangzhou stay is complete; continue to Singapore overnight.',
-    pace: 'Travel · CX659',
-    stops: [
-      {
-        time: '23:40',
-        title: 'Arrive Hong Kong',
-        note: 'CX989 lands on 21 September with a 2 hour 5 minute connection.',
-        place: '香港国际机场',
-        tone: 'gold',
-      },
-      {
-        time: '01:45',
-        title: 'CX659 to Singapore',
-        note: 'Overnight departure from Hong Kong to Singapore.',
-        place: '香港国际机场',
-        tone: 'red',
-      },
-      {
-        time: '05:30',
-        title: 'Arrive Singapore',
-        note: 'Home after six calendar days of travel.',
-        place: '新加坡樟宜机场',
-        tone: 'jade',
-      },
-    ],
-  },
-];
-
-const starterPins: Inspiration[] = [
-  {
-    id: 'tower-night',
-    title: 'Canton Tower night glow',
-    note: 'Save a riverbank photo angle before the first-night walk.',
-    category: 'Photo spot',
-    image: '/canton-tower-night.jpg',
-    xhsUrl:
-      'https://www.xiaohongshu.com/search_result?keyword=%E5%B9%BF%E5%B7%9E%E5%A1%94%E5%A4%9C%E6%99%AF%E6%9C%BA%E4%BD%8D',
-    amapPlace: '广州塔',
-  },
-  {
-    id: 'city-view',
-    title: 'Pearl River city view',
-    note: 'A skyline reference for the Huacheng Square and riverside route.',
-    category: 'City walk',
-    image: '/canton-tower-day.jpg',
-    xhsUrl:
-      'https://www.xiaohongshu.com/search_result?keyword=%E5%B9%BF%E5%B7%9E%E7%8F%A0%E6%B1%9Fcitywalk',
-    amapPlace: '花城广场',
   },
 ];
 
@@ -310,23 +354,31 @@ const hotel = {
     'https://www.google.com/maps/search/410+Jiefang+Middle+Road,+Yuexiu+District,+Guangzhou,+Guangdong,+China',
 };
 
-const notes = [
-  {
-    icon: Ticket,
-    title: 'Metro first',
-    copy: 'Most days are grouped by neighbourhood. Use Amap transit directions in China for the clearest live route.',
-  },
-  {
-    icon: Utensils,
-    title: 'Eat between rushes',
-    copy: 'Aim for dim sum before 10:00 and dinner before 18:00 when you want shorter queues.',
-  },
-  {
-    icon: Sparkles,
-    title: 'Keep one flex day',
-    copy: 'Day 20 can switch between Chimelong and Baiyun Mountain depending on energy and weather.',
-  },
-];
+function getCategoryIcon(category: StopCategory) {
+  switch (category) {
+    case 'Flight':
+      return Plane;
+    case 'Hotel':
+    case 'Transfer':
+      return Building2;
+    case 'Shopping':
+      return ShoppingBag;
+    case 'Dining':
+      return Utensils;
+    case 'Cafe':
+      return Coffee;
+    case 'Bakery':
+      return Store;
+    case 'Culture':
+      return Compass;
+    case 'Landmark':
+      return Landmark;
+    case 'Excursion':
+      return MapPin;
+    default:
+      return MapPin;
+  }
+}
 
 function amapUrl(place: string) {
   return `https://uri.amap.com/search?keyword=${encodeURIComponent(place)}&view=map&callnative=0`;
@@ -341,7 +393,13 @@ function isSafeLink(value: string) {
   }
 }
 
-function RouteButton({ place, compact = false }: { place: string; compact?: boolean }) {
+function RouteButton({
+  place,
+  compact = false,
+}: {
+  place: string;
+  compact?: boolean;
+}) {
   return (
     <a
       href={amapUrl(place)}
@@ -349,8 +407,8 @@ function RouteButton({ place, compact = false }: { place: string; compact?: bool
       rel="noreferrer"
       className={
         compact
-          ? 'inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-white/75 px-3 py-1.5 text-xs font-semibold text-[var(--ink)] transition hover:border-[var(--jade)] hover:text-[var(--jade)]'
-          : 'inline-flex items-center gap-2 rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[var(--jade)]'
+          ? 'inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-white/85 px-3 py-1.5 text-xs font-semibold text-[var(--ink)] shadow-2xs transition hover:border-[var(--jade)] hover:bg-white hover:text-[var(--jade)]'
+          : 'inline-flex items-center gap-2 rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--jade)]'
       }
     >
       <Navigation className={compact ? 'size-3.5' : 'size-4'} />
@@ -360,299 +418,525 @@ function RouteButton({ place, compact = false }: { place: string; compact?: bool
   );
 }
 
+function XhsButton({
+  url,
+  compact = false,
+}: {
+  url: string;
+  compact?: boolean;
+}) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className={
+        compact
+          ? 'inline-flex items-center gap-1.5 rounded-full border border-red-200/80 bg-red-50/90 px-3 py-1.5 text-xs font-bold text-[var(--xhs)] shadow-2xs transition hover:border-[var(--xhs)] hover:bg-[var(--xhs)] hover:text-white'
+          : 'inline-flex items-center gap-2 rounded-full bg-[var(--xhs)] px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:brightness-110'
+      }
+      aria-label="Open Xiaohongshu notes for this stop"
+    >
+      <span className="text-[10px] font-black tracking-wide">小红书</span>
+      <span>XHS</span>
+      <ExternalLink className={compact ? 'size-3' : 'size-3.5'} />
+    </a>
+  );
+}
+
 export default function Home() {
   const [activeDay, setActiveDay] = useState(0);
-  const [pins, setPins] = useState<Inspiration[]>(starterPins);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [formError, setFormError] = useState('');
+  const [viewMode, setViewMode] = useState<'timeline' | 'accordion'>('timeline');
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem('gz-xhs-pins');
-    if (!saved) return;
-    try {
-      const savedPins = JSON.parse(saved) as Inspiration[];
-      setPins([...starterPins, ...savedPins]);
-    } catch {
-      window.localStorage.removeItem('gz-xhs-pins');
-    }
-  }, []);
-
-  const customPins = useMemo(() => pins.filter((pin) => pin.custom), [pins]);
-
-  function saveCustomPins(nextPins: Inspiration[]) {
-    setPins(nextPins);
-    window.localStorage.setItem(
-      'gz-xhs-pins',
-      JSON.stringify(nextPins.filter((pin) => pin.custom)),
-    );
-  }
-
-  function addInspiration(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setFormError('');
-    const form = new FormData(event.currentTarget);
-    const title = String(form.get('title') || '').trim();
-    const xhsUrl = String(form.get('xhsUrl') || '').trim();
-    const image = String(form.get('image') || '').trim();
-    const amapPlace = String(form.get('amapPlace') || '').trim();
-    const note = String(form.get('note') || '').trim();
-
-    if (!title || !xhsUrl || !amapPlace) {
-      setFormError('Add a title, XHS link and Amap place.');
-      return;
-    }
-    if (!isSafeLink(xhsUrl) || (image && !isSafeLink(image))) {
-      setFormError('Please use a full http:// or https:// link.');
-      return;
-    }
-
-    const nextPin: Inspiration = {
-      id: `pin-${Date.now()}`,
-      title,
-      xhsUrl,
-      image: image || '/canton-tower-day.jpg',
-      amapPlace,
-      note: note || 'Saved from XHS for the Guangzhou plan.',
-      category: 'My pin',
-      custom: true,
-    };
-    saveCustomPins([...pins, nextPin]);
-    setDialogOpen(false);
-    event.currentTarget.reset();
-  }
-
-  function removePin(id: string) {
-    saveCustomPins(pins.filter((pin) => pin.id !== id));
-  }
-
-  const day = days[activeDay];
+  const currentDay = days[activeDay] ?? days[0];
 
   return (
     <main className="min-h-screen overflow-hidden bg-[var(--paper)] text-[var(--ink)]">
+      {/* Header */}
       <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--paper)]/92 backdrop-blur-xl">
         <div className="mx-auto flex h-[74px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
-          <a href="#plan" className="group flex items-center gap-3" aria-label="Guangzhou trip plan home">
+          <a
+            href="#plan"
+            className="group flex items-center gap-3"
+            aria-label="Guangzhou trip plan home"
+          >
             <span className="grid size-10 place-items-center rounded-full bg-[var(--vermilion)] text-[11px] font-black tracking-tight text-white transition group-hover:rotate-6">
               GZ
             </span>
             <span>
-              <span className="block font-serif text-lg font-bold leading-none">Guangzhou</span>
-              <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.24em] text-[var(--muted-ink)]">17—22 Sep · 2026</span>
+              <span className="block font-serif text-lg font-bold leading-none">
+                Guangzhou
+              </span>
+              <span className="mt-1 block text-[9px] font-bold uppercase tracking-[0.24em] text-[var(--muted-ink)]">
+                17—21 Sep · 2026
+              </span>
             </span>
           </a>
 
-          <nav className="hidden items-center gap-8 text-sm font-semibold md:flex" aria-label="Main navigation">
-            <a href="#plan" className="transition hover:text-[var(--vermilion)]">Itinerary</a>
-            <a href="#trip-details" className="transition hover:text-[var(--vermilion)]">Trip details</a>
-            <a href="#pins" className="transition hover:text-[var(--vermilion)]">XHS pins</a>
-            <a href="#notes" className="transition hover:text-[var(--vermilion)]">Travel notes</a>
+          <nav
+            className="hidden items-center gap-8 text-sm font-semibold md:flex"
+            aria-label="Main navigation"
+          >
+            <a href="#plan" className="transition hover:text-[var(--vermilion)]">
+              Itinerary
+            </a>
+            <a
+              href="#trip-details"
+              className="transition hover:text-[var(--vermilion)]"
+            >
+              Trip details
+            </a>
           </nav>
 
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger render={<Button className="h-10 rounded-full bg-[var(--ink)] px-4 text-white hover:bg-[var(--jade)]" />}>
-              <Plus className="size-4" />
-              <span className="hidden sm:inline">Add XHS pin</span>
-              <span className="sm:hidden">Add</span>
-            </DialogTrigger>
-            <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[28px] bg-[var(--paper)] p-6 sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle className="font-serif text-3xl font-bold">Save an inspiration</DialogTitle>
-                <DialogDescription className="text-[var(--muted-ink)]">
-                  Paste the XHS note link, its image URL and the place name you want to open in Amap.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={addInspiration} className="mt-2 space-y-4">
-                <label className="block text-sm font-bold">
-                  Title
-                  <Input name="title" placeholder="Late-night wonton noodles" className="mt-2 h-11 rounded-xl bg-white" />
-                </label>
-                <label className="block text-sm font-bold">
-                  XHS URL
-                  <Input name="xhsUrl" type="url" placeholder="https://www.xiaohongshu.com/..." className="mt-2 h-11 rounded-xl bg-white" />
-                </label>
-                <label className="block text-sm font-bold">
-                  Image URL <span className="font-normal text-[var(--muted-ink)]">(optional)</span>
-                  <Input name="image" type="url" placeholder="https://...jpg" className="mt-2 h-11 rounded-xl bg-white" />
-                </label>
-                <label className="block text-sm font-bold">
-                  Amap place or keyword
-                  <Input name="amapPlace" placeholder="荔湾湖公园" className="mt-2 h-11 rounded-xl bg-white" />
-                </label>
-                <label className="block text-sm font-bold">
-                  Note <span className="font-normal text-[var(--muted-ink)]">(optional)</span>
-                  <Textarea name="note" placeholder="What should we remember about this place?" className="mt-2 min-h-24 rounded-xl bg-white" />
-                </label>
-                {formError && <p className="rounded-xl bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">{formError}</p>}
-                <Button type="submit" className="h-12 w-full rounded-full bg-[var(--vermilion)] text-base text-white hover:bg-[var(--ink)]">
-                  Save to the board
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <div className="flex items-center gap-3">
+            <a
+              href="#plan"
+              className="inline-flex h-10 items-center gap-2 rounded-full bg-[var(--ink)] px-4 text-xs font-bold text-white transition hover:bg-[var(--jade)]"
+            >
+              <CalendarDays className="size-3.5 text-[var(--butter)]" />
+              <span>5-Day Plan</span>
+            </a>
+          </div>
         </div>
       </header>
 
+      {/* Hero & Main Itinerary Section */}
       <section id="plan" className="scroll-mt-24 border-b border-[var(--line)]">
-        <div className="mx-auto grid max-w-[1440px] lg:min-h-[690px] lg:grid-cols-[0.82fr_1.18fr]">
-          <div className="relative min-h-[470px] overflow-hidden border-b border-[var(--line)] lg:min-h-0 lg:border-b-0 lg:border-r">
+        <div className="mx-auto grid max-w-[1440px] lg:min-h-[720px] lg:grid-cols-[0.8fr_1.2fr]">
+          {/* Left Hero Column */}
+          <div className="relative min-h-[480px] overflow-hidden border-b border-[var(--line)] lg:min-h-0 lg:border-b-0 lg:border-r">
             <img
               src="/canton-tower-night.jpg"
               alt="Canton Tower illuminated beside the Pearl River at night"
               className="absolute inset-0 h-full w-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/5 to-black/80" />
-            <div className="relative flex h-full min-h-[470px] flex-col justify-between p-6 text-white sm:p-10 lg:min-h-[690px] lg:p-12">
+            <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/15 to-black/85" />
+            <div className="relative flex h-full min-h-[480px] flex-col justify-between p-6 text-white sm:p-10 lg:min-h-[720px] lg:p-12">
               <div className="flex items-center justify-between">
-                <span className="rounded-full border border-white/35 bg-black/15 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] backdrop-blur-md">The Canton Edit</span>
+                <span className="rounded-full border border-white/35 bg-black/20 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] backdrop-blur-md">
+                  The Canton Edit
+                </span>
                 <span className="font-serif text-4xl">广州</span>
               </div>
               <div className="max-w-xl">
-                <p className="mb-4 flex items-center gap-2 text-sm font-bold text-white/80">
-                  <CalendarDays className="size-4" /> 6 days · 5 nights
+                <p className="mb-4 flex items-center gap-2 text-sm font-bold text-white/90">
+                  <CalendarDays className="size-4 text-[var(--butter)]" /> 5 days
+                  · 4 nights in Guangzhou
                 </p>
-                <h1 className="font-serif text-[clamp(3.4rem,8vw,7rem)] font-bold leading-[0.78] tracking-[-0.055em]">
-                  Eat well.<br />Walk slow.
+                <h1 className="font-serif text-[clamp(3.2rem,7.5vw,6.5rem)] font-bold leading-[0.82] tracking-[-0.04em]">
+                  Eat well.
+                  <br />
+                  Walk slow.
                 </h1>
-                <p className="mt-6 max-w-md text-sm leading-6 text-white/80 sm:text-base">
-                  A neighbourhood-first plan for old lanes, late-night river light and plenty of room for dim sum.
+                <p className="mt-6 max-w-md text-sm leading-6 text-white/85 sm:text-base">
+                  A finalized 5-day neighbourhood plan spanning historic Liwan,
+                  vibrant Dongshankou, Tianhe CBD, and Conghua outlet excursions.
                 </p>
+                <div className="mt-6 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur-sm">
+                    Sept 17–21, 2026
+                  </span>
+                  <span className="rounded-full bg-[var(--butter)]/90 px-3 py-1 text-xs font-bold text-[var(--ink)]">
+                    5 Curated Days
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
+          {/* Right Itinerary Column */}
           <div className="flex flex-col bg-[var(--paper)] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="eyebrow">Your day-by-day plan</p>
-                <h2 className="mt-2 font-serif text-4xl font-bold tracking-tight sm:text-5xl">September, sorted.</h2>
+                <p className="eyebrow">5-Day Finalized Schedule</p>
+                <h2 className="mt-2 font-serif text-4xl font-bold tracking-tight sm:text-5xl">
+                  September, sorted.
+                </h2>
               </div>
-              <span className="rounded-full bg-[var(--butter)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em]">Guangzhou time</span>
-            </div>
-
-            <div className="mt-8 grid grid-cols-6 border-y border-[var(--line)]" role="tablist" aria-label="Choose itinerary day">
-              {days.map((item, index) => (
-                <button
-                  key={item.date}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeDay === index}
-                  onClick={() => setActiveDay(index)}
-                  className={`group relative py-4 text-center transition sm:py-5 ${activeDay === index ? 'bg-[var(--ink)] text-white' : 'hover:bg-white/70'}`}
-                >
-                  <span className={`block text-[9px] font-black uppercase tracking-[0.18em] ${activeDay === index ? 'text-white/60' : 'text-[var(--muted-ink)]'}`}>{item.weekday}</span>
-                  <span className="mt-1 block font-serif text-2xl font-bold sm:text-3xl">{item.date}</span>
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-8 flex-1" role="tabpanel">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-serif text-3xl font-bold sm:text-4xl">{day.title}</h3>
-                  <p className="mt-2 text-sm text-[var(--muted-ink)] sm:text-base">{day.subtitle}</p>
+              <div className="flex items-center gap-2">
+                <div className="inline-flex rounded-full border border-[var(--line)] bg-white/70 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('timeline')}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold transition ${
+                      viewMode === 'timeline'
+                        ? 'bg-[var(--ink)] text-white'
+                        : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'
+                    }`}
+                  >
+                    <Layers className="size-3.5" /> Day View
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode('accordion')}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold transition ${
+                      viewMode === 'accordion'
+                        ? 'bg-[var(--ink)] text-white'
+                        : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'
+                    }`}
+                  >
+                    <Compass className="size-3.5" /> All Days
+                  </button>
                 </div>
-                <span className="flex items-center gap-1.5 rounded-full border border-[var(--line)] px-3 py-1.5 text-xs font-bold text-[var(--muted-ink)]">
-                  <Clock3 className="size-3.5" /> {day.pace}
+                <span className="hidden rounded-full bg-[var(--butter)] px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] sm:inline-block">
+                  CST (UTC+8)
                 </span>
               </div>
-
-              <div className="mt-7 divide-y divide-[var(--line)] border-y border-[var(--line)]">
-                {day.stops.map((stop) => (
-                  <div key={`${day.date}-${stop.time}`} className="grid grid-cols-[66px_1fr_auto] items-start gap-3 py-4 sm:grid-cols-[80px_1fr_auto] sm:gap-5 sm:py-5">
-                    <div className="pt-1 text-xs font-black tracking-wide text-[var(--muted-ink)]">{stop.time}</div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="size-2.5 shrink-0 rounded-full"
-                          style={{ backgroundColor: `var(--${stop.tone})` }}
-                        />
-                        <h4 className="font-bold leading-tight">{stop.title}</h4>
-                      </div>
-                      <p className="mt-1.5 max-w-md text-sm leading-5 text-[var(--muted-ink)]">{stop.note}</p>
-                    </div>
-                    <RouteButton place={stop.place} compact />
-                  </div>
-                ))}
-              </div>
             </div>
 
-            <div className="mt-7 flex flex-wrap items-center justify-between gap-4">
-              <p className="text-xs leading-5 text-[var(--muted-ink)]">Tap any Amap link to search the place in 高德地图.</p>
-              <RouteButton place={day.stops.map((stop) => stop.place).join(' ')} />
+            {/* 5-Day Navigation Tabs */}
+            <div
+              className="mt-8 grid grid-cols-5 border-y border-[var(--line)]"
+              role="tablist"
+              aria-label="Choose itinerary day"
+            >
+              {days.map((item, index) => {
+                const isSelected = activeDay === index;
+                return (
+                  <button
+                    key={item.date}
+                    type="button"
+                    role="tab"
+                    aria-selected={isSelected}
+                    onClick={() => {
+                      setActiveDay(index);
+                      if (viewMode === 'accordion') setViewMode('timeline');
+                    }}
+                    className={`group relative py-4 text-center transition sm:py-5 ${
+                      isSelected
+                        ? 'bg-[var(--ink)] text-white shadow-sm'
+                        : 'hover:bg-white/70'
+                    }`}
+                  >
+                    <span
+                      className={`block text-[9px] font-black uppercase tracking-[0.18em] ${
+                        isSelected ? 'text-[var(--butter)]' : 'text-[var(--muted-ink)]'
+                      }`}
+                    >
+                      Day {item.dayNumber} · {item.weekday}
+                    </span>
+                    <span className="mt-1 block font-serif text-2xl font-bold sm:text-3xl">
+                      {item.date}
+                    </span>
+                    <span
+                      className={`mt-1 hidden truncate px-1 text-[11px] font-medium md:block ${
+                        isSelected ? 'text-white/80' : 'text-[var(--muted-ink)]'
+                      }`}
+                    >
+                      {item.area}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Tab Panel Content: Timeline Mode vs Accordion Mode */}
+            {viewMode === 'timeline' ? (
+              <div className="mt-8 flex-1" role="tabpanel">
+                {/* Active Day Header */}
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-md bg-[var(--vermilion)]/10 px-2 py-0.5 text-xs font-black text-[var(--vermilion)]">
+                        Day {currentDay.dayNumber} · Sept {currentDay.date}
+                      </span>
+                      <span className="text-xs font-bold text-[var(--muted-ink)]">
+                        {currentDay.area}
+                      </span>
+                    </div>
+                    <h3 className="mt-2 font-serif text-3xl font-bold sm:text-4xl">
+                      {currentDay.title}
+                    </h3>
+                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--muted-ink)] sm:text-base">
+                      {currentDay.subtitle}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-white/60 px-3 py-1.5 text-xs font-bold text-[var(--muted-ink)]">
+                      <Clock3 className="size-3.5" /> {currentDay.pace}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Timeline Cards */}
+                <div className="mt-7 space-y-4">
+                  {currentDay.stops.map((stop, idx) => {
+                    const CategoryIcon = getCategoryIcon(stop.category);
+                    return (
+                      <Card
+                        key={`${currentDay.date}-${stop.time}-${idx}`}
+                        className="border-none bg-white/85 shadow-xs ring-1 ring-black/5 transition hover:bg-white hover:shadow-md"
+                      >
+                        <CardHeader className="pb-2">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="flex items-center gap-1 rounded-full bg-[var(--paper)] px-2.5 py-1 text-xs font-black text-[var(--ink)] ring-1 ring-[var(--line)]">
+                                <Clock3 className="size-3 text-[var(--vermilion)]" />
+                                {stop.time}
+                              </span>
+                              <Badge
+                                variant="outline"
+                                className="border-[var(--line)] bg-[var(--paper)]/50 text-[11px] font-bold text-[var(--ink)]"
+                              >
+                                <CategoryIcon className="mr-1 size-3 text-[var(--muted-ink)]" />
+                                {stop.tag}
+                              </Badge>
+                            </div>
+                            <span
+                              className="size-2.5 rounded-full"
+                              style={{ backgroundColor: `var(--${stop.tone})` }}
+                              title={`Status priority: ${stop.tone}`}
+                            />
+                          </div>
+                          <CardTitle className="mt-2 text-lg font-bold sm:text-xl">
+                            {stop.title}
+                          </CardTitle>
+                          <CardDescription className="text-xs font-semibold text-[var(--jade)]">
+                            {stop.place}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <p className="text-sm leading-6 text-[var(--muted-ink)]">
+                            {stop.note}
+                          </p>
+                          <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--line)]/50 pt-2.5">
+                            <span className="text-[11px] font-medium text-[var(--muted-ink)]">
+                              Stop {idx + 1} of {currentDay.stops.length}
+                            </span>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <XhsButton url={stop.xhsUrl} compact />
+                              <RouteButton place={stop.place} compact />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              /* 5-Day Accordion Overview Mode */
+              <div className="mt-8 flex-1">
+                <div className="mb-6 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-serif text-2xl font-bold sm:text-3xl">
+                      Full 5-Day Overview
+                    </h3>
+                    <p className="text-sm text-[var(--muted-ink)]">
+                      Expand any day to inspect full itinerary details, XHS research notes, and Amap routes.
+                    </p>
+                  </div>
+                </div>
+                <Accordion
+                  className="w-full space-y-3"
+                  defaultValue={['day-17']}
+                >
+                  {days.map((d) => (
+                    <AccordionItem
+                      key={d.date}
+                      value={`day-${d.date}`}
+                      className="overflow-hidden rounded-2xl border border-[var(--line)] bg-white/80 px-4 py-1 transition data-[state=open]:bg-white data-[state=open]:shadow-sm"
+                    >
+                      <AccordionTrigger className="hover:no-underline py-3">
+                        <div className="flex items-center gap-3 text-left">
+                          <span className="flex size-9 items-center justify-center rounded-xl bg-[var(--ink)] text-xs font-black text-white">
+                            {d.date}
+                          </span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-black uppercase tracking-wider text-[var(--vermilion)]">
+                                Day {d.dayNumber} · {d.weekday}
+                              </span>
+                              <span className="rounded-full bg-[var(--paper)] px-2 py-0.5 text-[10px] font-bold text-[var(--muted-ink)]">
+                                {d.stops.length} stops
+                              </span>
+                            </div>
+                            <h4 className="font-serif text-lg font-bold text-[var(--ink)]">
+                              {d.title}
+                            </h4>
+                          </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="pt-2 pb-4">
+                        <p className="mb-4 text-xs leading-5 text-[var(--muted-ink)]">
+                          {d.subtitle}
+                        </p>
+                        <div className="space-y-3">
+                          {d.stops.map((st, i) => (
+                            <div
+                              key={`${d.date}-${st.time}-${i}`}
+                              className="grid grid-cols-[64px_1fr_auto] items-start gap-3 rounded-xl bg-[var(--paper)]/60 p-3"
+                            >
+                              <span className="pt-0.5 text-xs font-black text-[var(--muted-ink)]">
+                                {st.time}
+                              </span>
+                              <div>
+                                <h5 className="text-sm font-bold text-[var(--ink)]">
+                                  {st.title}
+                                </h5>
+                                <p className="mt-0.5 text-xs text-[var(--muted-ink)]">
+                                  {st.note}
+                                </p>
+                              </div>
+                              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                <XhsButton url={st.xhsUrl} compact />
+                                <RouteButton place={st.place} compact />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            )}
+
+            {/* Bottom Itinerary Action Bar */}
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--line)] pt-6">
+              <div className="flex items-center gap-2 text-xs text-[var(--muted-ink)]">
+                <CheckCircle2 className="size-4 text-[var(--jade)]" />
+                <span>
+                  Tap <b>XHS</b> for Xiaohongshu photos/reviews or <b>Amap</b> for 高德地图 transit navigation.
+                </span>
+              </div>
+              <RouteButton
+                place={currentDay.stops.map((stop) => stop.place).join(' ')}
+              />
             </div>
           </div>
         </div>
       </section>
 
-      <section id="trip-details" className="scroll-mt-20 bg-[var(--butter)] py-20 sm:py-24">
+      {/* Trip Details Section (Hotel & Flights) */}
+      <section
+        id="trip-details"
+        className="scroll-mt-20 bg-[var(--butter)] py-20 sm:py-24"
+      >
         <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
           <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
             <div>
-              <p className="eyebrow text-[var(--ink)]/60">Fixed trip anchors</p>
-              <h2 className="mt-3 font-serif text-5xl font-bold tracking-tight sm:text-6xl">Stay & flights.</h2>
+              <p className="eyebrow text-[var(--ink)]/60">Fixed Trip Anchors</p>
+              <h2 className="mt-3 font-serif text-5xl font-bold tracking-tight sm:text-6xl">
+                Stay & flights.
+              </h2>
             </div>
-            <p className="max-w-md text-sm leading-6 text-[var(--ink)]/65">
-              Flight times below are shown in local time. These anchors now set the pace for the first and final days.
+            <p className="max-w-md text-sm leading-6 text-[var(--ink)]/75">
+              Flight times shown in local time. The Yuexiu hotel base anchors the
+              first and final days with easy access to Gongyuanqian Metro.
             </p>
           </div>
 
           <div className="mt-10 grid gap-5 lg:grid-cols-[0.86fr_1.14fr]">
+            {/* Hotel Card */}
             <article className="flex flex-col justify-between rounded-[30px] bg-[var(--ink)] p-6 text-white sm:p-8">
               <div>
                 <div className="flex items-center justify-between gap-4">
-                  <span className="grid size-12 place-items-center rounded-full bg-white/10"><MapPin className="size-5 text-[var(--butter)]" /></span>
-                  <span className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white/60">4 nights · Yuexiu</span>
+                  <span className="grid size-12 place-items-center rounded-full bg-white/10">
+                    <MapPin className="size-5 text-[var(--butter)]" />
+                  </span>
+                  <span className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white/70">
+                    4 nights · Yuexiu District
+                  </span>
                 </div>
-                <p className="mt-8 text-[10px] font-black uppercase tracking-[0.18em] text-[var(--butter)]">Your Guangzhou base</p>
-                <h3 className="mt-2 font-serif text-3xl font-bold sm:text-4xl">{hotel.name}</h3>
-                <p className="mt-2 text-sm font-semibold text-white/70">{hotel.descriptor}</p>
-                <p className="mt-5 text-base font-bold leading-7">{hotel.chinese}</p>
-                <div className="mt-5 border-l border-white/20 pl-4 text-sm leading-6 text-white/60">
+                <p className="mt-8 text-[10px] font-black uppercase tracking-[0.18em] text-[var(--butter)]">
+                  Your Guangzhou Base
+                </p>
+                <h3 className="mt-2 font-serif text-3xl font-bold sm:text-4xl">
+                  {hotel.name}
+                </h3>
+                <p className="mt-2 text-sm font-semibold text-white/80">
+                  {hotel.descriptor}
+                </p>
+                <p className="mt-5 text-base font-bold leading-7 text-[var(--butter)]">
+                  {hotel.chinese}
+                </p>
+                <div className="mt-4 border-l border-white/20 pl-4 text-sm leading-6 text-white/70">
                   <p>{hotel.address}</p>
                   <p>{hotel.chineseAddress}</p>
                 </div>
               </div>
 
               <div className="mt-8 flex flex-wrap gap-2">
-                <a href={amapUrl(hotel.chinese)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[var(--butter)] px-4 py-2.5 text-xs font-bold text-[var(--ink)] transition hover:-translate-y-0.5 hover:bg-white">
+                <a
+                  href={amapUrl(hotel.chinese)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-[var(--butter)] px-4 py-2.5 text-xs font-bold text-[var(--ink)] transition hover:-translate-y-0.5 hover:bg-white"
+                >
                   <Navigation className="size-3.5" /> Open in Amap
                 </a>
-                <a href={hotel.googleUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2.5 text-xs font-bold text-white transition hover:border-white hover:bg-white/10">
+                <a
+                  href={`https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(hotel.name)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-[var(--xhs)] px-4 py-2.5 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:brightness-110"
+                >
+                  <span className="font-black text-[10px]">小红书</span> XHS <ExternalLink className="size-3.5" />
+                </a>
+                <a
+                  href={hotel.googleUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2.5 text-xs font-bold text-white transition hover:border-white hover:bg-white/10"
+                >
                   Google Maps <ExternalLink className="size-3.5" />
                 </a>
               </div>
 
-              <div className="mt-8 rounded-2xl bg-white/[0.07] p-4 text-sm leading-6 text-white/65">
-                <span className="font-bold text-white">Planning logic:</span> keep the arrival and final day around Gongyuanqian and Beijing Road; group western Liwan stops together; save eastern Guangzhou for its own route.
+              <div className="mt-8 rounded-2xl bg-white/[0.08] p-4 text-sm leading-6 text-white/75">
+                <span className="font-bold text-white">5-Day Planning Logic:</span>{' '}
+                Base in Yuexiu (Gongyuanqian). Day 1 covers Haizhu & shoe waffles;
+                Day 2 explores Liwan & Xihua cafes; Day 3 takes on Dongshankou &
+                Tianhe CBD; Day 4 heads to Conghua 8号仓 outlets & Baiyun hotpot;
+                Day 5 enjoys waffles before CX989 departure.
               </div>
             </article>
 
+            {/* Flight Cards */}
             <div className="grid gap-3 sm:grid-cols-2">
-              {flights.map((flight, index) => (
-                <article key={flight.flight} className="flex min-h-56 flex-col justify-between rounded-[26px] bg-[var(--paper)] p-5 sm:p-6">
+              {flights.map((flight) => (
+                <article
+                  key={flight.flight}
+                  className="flex min-h-56 flex-col justify-between rounded-[26px] bg-[var(--paper)] p-5 sm:p-6 shadow-xs"
+                >
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[var(--muted-ink)]">{flight.date}</span>
-                    <span className="rounded-full bg-white px-3 py-1 text-xs font-black">{flight.flight}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[var(--muted-ink)]">
+                      {flight.date}
+                    </span>
+                    <span className="rounded-full bg-white px-3 py-1 text-xs font-black shadow-xs">
+                      {flight.flight}
+                    </span>
                   </div>
-                  <div className="my-7">
-                    <p className="font-serif text-xl font-bold">{flight.route}</p>
+                  <div className="my-6">
+                    <p className="font-serif text-lg font-bold">{flight.route}</p>
                     <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
                       <div>
-                        <p className="font-serif text-3xl font-bold">{flight.depart}</p>
-                        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.16em] text-[var(--muted-ink)]">Depart</p>
+                        <p className="font-serif text-3xl font-bold">
+                          {flight.depart}
+                        </p>
+                        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.16em] text-[var(--muted-ink)]">
+                          Depart
+                        </p>
                       </div>
                       <div className="flex items-center gap-2 text-[var(--vermilion)]">
-                        <span className="h-px w-5 bg-current" />
+                        <span className="h-px w-4 bg-current" />
                         <Plane className="size-4 rotate-45" />
-                        <span className="h-px w-5 bg-current" />
+                        <span className="h-px w-4 bg-current" />
                       </div>
                       <div className="text-right">
-                        <p className="font-serif text-3xl font-bold">{flight.arrive}</p>
-                        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.16em] text-[var(--muted-ink)]">Arrive</p>
+                        <p className="font-serif text-3xl font-bold">
+                          {flight.arrive}
+                        </p>
+                        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.16em] text-[var(--muted-ink)]">
+                          Arrive
+                        </p>
                       </div>
                     </div>
                   </div>
-                  <p className="border-t border-[var(--line)] pt-4 text-xs font-semibold text-[var(--muted-ink)]">{flight.detail}</p>
+                  <p className="border-t border-[var(--line)] pt-3 text-xs font-semibold text-[var(--muted-ink)]">
+                    {flight.detail}
+                  </p>
                 </article>
               ))}
             </div>
@@ -660,126 +944,14 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="pins" className="scroll-mt-20 bg-[var(--ink)] py-20 text-white sm:py-28">
-        <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
-          <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
-            <div className="max-w-2xl">
-              <p className="eyebrow text-[var(--butter)]">XHS inspiration board · 小红书</p>
-              <h2 className="mt-3 font-serif text-5xl font-bold tracking-tight sm:text-6xl">From saved post<br />to actual place.</h2>
-              <p className="mt-5 max-w-xl leading-7 text-white/62">
-                Keep the photo reference, original XHS note and Amap destination together—so a saved idea can become a real stop.
-              </p>
-            </div>
-            <Button onClick={() => setDialogOpen(true)} className="h-12 w-fit rounded-full bg-[var(--butter)] px-5 font-bold text-[var(--ink)] hover:bg-white">
-              <CirclePlus className="size-4" /> Add inspiration
-            </Button>
-          </div>
-
-          <div className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {pins.map((pin, index) => (
-              <article key={pin.id} className="group overflow-hidden rounded-[28px] bg-[var(--paper)] text-[var(--ink)]">
-                <div className="relative aspect-[4/3] overflow-hidden bg-[var(--sand)]">
-                  <img
-                    src={pin.image}
-                    alt=""
-                    className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
-                    onError={(event) => {
-                      event.currentTarget.src = '/canton-tower-day.jpg';
-                    }}
-                  />
-                  <span className="absolute left-4 top-4 rounded-full bg-[var(--paper)]/90 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] backdrop-blur-md">{pin.category}</span>
-                  <span className="absolute bottom-4 right-4 grid size-10 place-items-center rounded-full bg-[var(--xhs)] text-white shadow-lg"><Heart className="size-4 fill-current" /></span>
-                </div>
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[var(--muted-ink)]">Pin {String(index + 1).padStart(2, '0')}</p>
-                      <h3 className="mt-1 font-serif text-2xl font-bold">{pin.title}</h3>
-                    </div>
-                    {pin.custom && (
-                      <button
-                        type="button"
-                        aria-label={`Remove ${pin.title}`}
-                        onClick={() => removePin(pin.id)}
-                        className="grid size-9 shrink-0 place-items-center rounded-full text-[var(--muted-ink)] transition hover:bg-red-50 hover:text-red-700"
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
-                    )}
-                  </div>
-                  <p className="mt-3 min-h-10 text-sm leading-5 text-[var(--muted-ink)]">{pin.note}</p>
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <a href={pin.xhsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[var(--xhs)] px-4 py-2 text-xs font-bold text-white transition hover:-translate-y-0.5 hover:brightness-95">
-                      Open XHS <ExternalLink className="size-3.5" />
-                    </a>
-                    <RouteButton place={pin.amapPlace} compact />
-                  </div>
-                </div>
-              </article>
-            ))}
-
-            <button
-              type="button"
-              onClick={() => setDialogOpen(true)}
-              className="group min-h-[420px] rounded-[28px] border border-dashed border-white/25 p-8 text-left transition hover:border-[var(--butter)] hover:bg-white/[0.04]"
-            >
-              <span className="grid size-14 place-items-center rounded-full bg-white/10 transition group-hover:bg-[var(--butter)] group-hover:text-[var(--ink)]"><Plus className="size-5" /></span>
-              <div className="mt-24">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-white/45">Your research</p>
-                <h3 className="mt-2 font-serif text-3xl font-bold">Save the next<br />good find.</h3>
-                <p className="mt-4 max-w-xs text-sm leading-6 text-white/55">Add the XHS post link, paste an image URL and type the Amap location keyword.</p>
-              </div>
-            </button>
-          </div>
-
-          {customPins.length > 0 && (
-            <p className="mt-6 text-xs text-white/40">{customPins.length} personal {customPins.length === 1 ? 'pin' : 'pins'} saved on this device.</p>
-          )}
-        </div>
-      </section>
-
-      <section id="notes" className="scroll-mt-20 bg-[var(--paper)] py-20 sm:py-28">
-        <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
-          <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-20">
-            <div>
-              <p className="eyebrow">Small things, big difference</p>
-              <h2 className="mt-3 font-serif text-5xl font-bold leading-[0.92] tracking-tight sm:text-6xl">Notes for a<br />softer landing.</h2>
-              <div className="mt-8 inline-flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-[0_12px_40px_rgba(20,34,34,0.08)]">
-                <Plane className="size-5 text-[var(--vermilion)]" />
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--muted-ink)]">Trip window</p>
-                  <p className="text-sm font-bold">17–22 September 2026</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="divide-y divide-[var(--line)] border-y border-[var(--line)]">
-              {notes.map((note, index) => {
-                const Icon = note.icon;
-                return (
-                  <div key={note.title} className="grid grid-cols-[48px_1fr_auto] items-start gap-4 py-7 sm:grid-cols-[64px_1fr_auto] sm:gap-6 sm:py-8">
-                    <span className="grid size-12 place-items-center rounded-full bg-white text-[var(--vermilion)] shadow-sm sm:size-14"><Icon className="size-5" /></span>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[var(--muted-ink)]">0{index + 1}</p>
-                      <h3 className="mt-1 font-serif text-2xl font-bold">{note.title}</h3>
-                      <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--muted-ink)]">{note.copy}</p>
-                    </div>
-                    <ChevronRight className="mt-4 size-4 text-[var(--muted-ink)]" />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer className="border-t border-[var(--line)] bg-[var(--paper)]">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-5 py-8 text-xs text-[var(--muted-ink)] sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12">
-          <p className="font-bold text-[var(--ink)]">Guangzhou · 广州 · 17—22.09.2026</p>
-          <p>
-            Photos: Daniel Lu & Tim Wu via{' '}
-            <a href="https://commons.wikimedia.org" target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:text-[var(--ink)]">Wikimedia Commons</a>{' '}
-            · CC BY-SA 4.0
+      {/* Footer */}
+      <footer className="border-t border-[var(--line)] bg-[var(--paper)] py-8">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-5 text-xs text-[var(--muted-ink)] sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12">
+          <p className="font-bold text-[var(--ink)]">
+            Guangzhou · 广州 · 17—21.09.2026 · 5-Day Finalized Itinerary
+          </p>
+          <p className="text-xs text-[var(--muted-ink)]">
+            Have a wonderful and delicious trip to Guangzhou!
           </p>
         </div>
       </footer>

@@ -20,11 +20,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
-  title: 'Guangzhou 2026 · Trip Planner',
-  description: 'A six-day Guangzhou itinerary with XHS inspiration pins and Amap links for 17–22 September 2026.',
+  title: 'Guangzhou 2026 · 5-Day Trip Planner',
+  description: 'A 5-day Guangzhou itinerary with XHS inspiration pins and Amap links for 17–21 September 2026.',
   openGraph: {
     title: 'Guangzhou 2026 · Eat well. Walk slow.',
-    description: 'Six days of old lanes, late-night river light and excellent dim sum.',
+    description: 'Five days of old lanes, modern landmarks, outlet finds, and excellent food.',
     type: 'website',
     images: [
       {
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Guangzhou 2026 · Eat well. Walk slow.',
-    description: 'A six-day Guangzhou trip plan with XHS pins and Amap links.',
+    description: 'A 5-day Guangzhou trip plan with XHS pins and Amap links for 17–21 September 2026.',
     images: ['/og.png'],
   },
 };
