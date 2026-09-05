@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   metadataBase: siteUrl,
   title: 'Guangzhou 2026 · 5-Day Trip Planner',
   description: 'A 5-day Guangzhou itinerary with XHS inspiration pins and Amap links for 17–21 September 2026.',
+  icons: {
+    icon: '/favicon.svg',
+  },
   openGraph: {
     title: 'Guangzhou 2026 · Eat well. Walk slow.',
     description: 'Five days of old lanes, modern landmarks, outlet finds, and excellent food.',
