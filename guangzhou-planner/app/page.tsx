@@ -10,7 +10,6 @@ import {
   Compass,
   ExternalLink,
   Landmark,
-  Layers,
   MapPin,
   Navigation,
   Plane,
@@ -35,7 +34,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type Filter = 'All' | 'Food' | 'Shopping' | 'Culture';
 type StopCategory =
@@ -663,8 +661,8 @@ function StopCard({
     <Card
       className={
         stop.category === 'Supermarket'
-          ? 'border-none bg-emerald-50 shadow-sm ring-2 ring-emerald-300 transition hover:bg-emerald-50 hover:shadow-md'
-          : 'border-none bg-white/85 shadow-xs ring-1 ring-black/5 transition hover:bg-white hover:shadow-md'
+          ? 'h-full border-none bg-emerald-50 shadow-sm ring-2 ring-emerald-300 transition hover:bg-emerald-50 hover:shadow-md'
+          : 'h-full border-none bg-white/85 shadow-xs ring-1 ring-black/5 transition hover:bg-white hover:shadow-md'
       }
     >
       <CardHeader className="pb-2">
@@ -709,12 +707,7 @@ function StopCard({
 }
 
 export default function Home() {
-  const [activeDay, setActiveDay] = useState('0');
-  const [viewMode, setViewMode] = useState<'timeline' | 'accordion'>(
-    'timeline',
-  );
   const [activeFilter, setActiveFilter] = useState<Filter>('All');
-  const currentDay = days[Number(activeDay)] ?? days[0];
 
   return (
     <main className="min-h-screen overflow-hidden bg-[var(--paper)] text-[var(--ink)]">
@@ -778,309 +771,201 @@ export default function Home() {
       </header>
 
       <section id="plan" className="scroll-mt-28 border-b border-[var(--line)]">
-        <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[0.74fr_1.26fr]">
-          <div className="relative min-h-[500px] overflow-hidden border-b border-[var(--line)] lg:sticky lg:top-[107px] lg:h-[calc(100vh-107px)] lg:min-h-[650px] lg:border-r lg:border-b-0">
-            <Image
-              src="/canton-tower-night.jpg"
-              alt="Canton Tower illuminated beside the Pearl River at night"
-              fill
-              priority
-              sizes="(min-width: 1024px) 37vw, 100vw"
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/15 to-black/90" />
-            <div className="relative flex h-full min-h-[500px] flex-col justify-between p-6 text-white sm:p-10 lg:min-h-[650px] lg:p-12">
-              <div className="flex items-center justify-between gap-4">
-                <span className="rounded-full border border-white/35 bg-black/20 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] backdrop-blur-md">
+        <div className="relative min-h-[330px] overflow-hidden border-b border-[var(--line)] sm:min-h-[380px]">
+          <Image
+            src="/canton-tower-night.jpg"
+            alt="Canton Tower illuminated beside the Pearl River at night"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/15" />
+          <div className="relative mx-auto flex min-h-[330px] max-w-[1440px] items-end px-5 py-8 text-white sm:min-h-[380px] sm:items-center sm:px-8 sm:py-12 lg:px-12">
+            <div className="max-w-3xl">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="rounded-full border border-white/35 bg-black/20 px-4 py-2 text-[11px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
                   The Canton Edit
                 </span>
-                <span className="font-serif text-4xl">广州</span>
+                <span className="font-serif text-3xl">广州</span>
               </div>
-              <div className="max-w-xl">
-                <p className="mb-4 flex items-center gap-2 text-sm font-bold text-white/90">
-                  <Sparkles
-                    className="size-4 text-[var(--butter)]"
-                    aria-hidden="true"
-                  />
-                  5 days · 4 nights · one central base
-                </p>
-                <h1 className="font-serif text-[clamp(3.2rem,7.5vw,6.5rem)] font-bold leading-[0.82] tracking-[-0.04em]">
-                  Eat well.
-                  <br />
-                  Walk slow.
-                </h1>
-                <p className="mt-6 max-w-md text-base leading-7 text-white/85">
-                  Old lanes, indie shops, outlet finds, and skyline
-                  nights—grouped by district to keep every day moving in one
-                  direction.
-                </p>
-                <div className="mt-6 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-sm">
-                    Sept 17–21
-                  </span>
-                  <span className="rounded-full bg-[var(--butter)] px-3 py-1.5 text-xs font-bold text-[var(--ink)]">
-                    5 neighbourhood days
-                  </span>
-                </div>
+              <h1 className="mt-5 font-serif text-[clamp(3.2rem,8vw,5.6rem)] font-bold leading-[0.88] tracking-[-0.04em]">
+                Eat well. Walk slow.
+              </h1>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-white/85 sm:text-lg">
+                Five neighbourhood days with every stop, flight milestone, and
+                route link in one tidy plan.
+              </p>
+              <div className="mt-5 flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold text-white/90 backdrop-blur-sm">
+                  Sept 17–21 · 4 nights
+                </span>
+                <span className="rounded-full bg-[var(--butter)] px-3 py-1.5 text-sm font-bold text-[var(--ink)]">
+                  YUE HOTEL · Gongyuanqian
+                </span>
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="min-w-0 bg-[var(--paper)] px-5 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="eyebrow">Your complete schedule</p>
-                <h2 className="mt-2 font-serif text-4xl font-bold tracking-tight sm:text-5xl">
-                  Five days, sorted.
-                </h2>
-              </div>
-              <div
-                className="inline-flex rounded-full border border-[var(--line)] bg-white/70 p-1"
-                aria-label="Itinerary view"
-              >
-                <button
-                  type="button"
-                  onClick={() => setViewMode('timeline')}
-                  aria-pressed={viewMode === 'timeline'}
-                  className={`flex min-h-9 items-center gap-1.5 rounded-full px-3 text-xs font-bold transition ${viewMode === 'timeline' ? 'bg-[var(--ink)] text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}
-                >
-                  <Layers className="size-3.5" aria-hidden="true" /> Day view
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode('accordion')}
-                  aria-pressed={viewMode === 'accordion'}
-                  className={`flex min-h-9 items-center gap-1.5 rounded-full px-3 text-xs font-bold transition ${viewMode === 'accordion' ? 'bg-[var(--ink)] text-white' : 'text-[var(--muted-ink)] hover:text-[var(--ink)]'}`}
-                >
-                  <Compass className="size-3.5" aria-hidden="true" /> All days
-                </button>
-              </div>
+        <div className="mx-auto max-w-[1180px] px-5 py-12 sm:px-8 sm:py-16 lg:px-10">
+          <div className="grid gap-5 border-b border-[var(--line)] pb-8 md:grid-cols-[1fr_auto] md:items-end">
+            <div>
+              <p className="eyebrow">Your complete schedule</p>
+              <h2 className="mt-2 font-serif text-4xl font-bold tracking-tight sm:text-5xl">
+                Five days, sorted.
+              </h2>
+              <p className="mt-3 max-w-2xl text-base leading-7 text-[var(--muted-ink)]">
+                Open any day for its chronological stops. All days start
+                collapsed so you can scan the whole trip first.
+              </p>
             </div>
-
-            <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-y border-[var(--line)] py-4">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--muted-ink)]">
-                  Show me
-                </p>
-                <p className="mt-1 text-sm text-[var(--muted-ink)]">
-                  Filter stops without changing the route.
-                </p>
-              </div>
-              <div
-                className="flex flex-wrap gap-2"
-                aria-label="Filter itinerary stops"
-              >
-                {filters.map((filter) => (
-                  <button
-                    key={filter}
-                    type="button"
-                    onClick={() => setActiveFilter(filter)}
-                    aria-pressed={activeFilter === filter}
-                    className={`min-h-10 rounded-full border px-4 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--jade)] ${activeFilter === filter ? 'border-[var(--jade)] bg-[var(--jade)] text-white shadow-sm' : 'border-[var(--line)] bg-white/70 text-[var(--ink)] hover:border-[var(--jade)] hover:bg-white'}`}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
+            <div className="flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/70 px-4 py-2.5 text-sm font-bold text-[var(--ink)]">
+              <Compass
+                className="size-4 text-[var(--jade)]"
+                aria-hidden="true"
+              />
+              All days
             </div>
+          </div>
 
-            {viewMode === 'timeline' ? (
-              <Tabs
-                value={activeDay}
-                onValueChange={setActiveDay}
-                className="mt-7 gap-0"
-              >
-                <div className="overflow-x-auto pb-2">
-                  <TabsList className="grid h-auto min-w-[520px] grid-cols-5 rounded-none border-y border-[var(--line)] bg-transparent p-0">
-                    {days.map((day, index) => (
-                      <TabsTrigger
-                        key={day.date}
-                        value={String(index)}
-                        className="h-auto min-h-20 rounded-none border-r border-[var(--line)] px-2 py-3 text-[var(--ink)] last:border-r-0 data-active:bg-[var(--ink)] data-active:text-white sm:min-h-24"
-                      >
+          <div className="mt-6 rounded-[24px] border border-[var(--line)] bg-white/55 p-4 shadow-xs sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-5">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--muted-ink)]">
+                Show me
+              </p>
+              <p className="mt-1 text-sm text-[var(--muted-ink)]">
+                Filter stops across all five days.
+              </p>
+            </div>
+            <div
+              className="mt-4 flex flex-wrap gap-2 sm:mt-0 sm:justify-end"
+              aria-label="Filter itinerary stops"
+            >
+              {filters.map((filter) => (
+                <button
+                  key={filter}
+                  type="button"
+                  onClick={() => setActiveFilter(filter)}
+                  aria-pressed={activeFilter === filter}
+                  className={`min-h-10 rounded-full border px-4 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--jade)] ${
+                    activeFilter === filter
+                      ? 'border-[var(--jade)] bg-[var(--jade)] text-white shadow-sm'
+                      : 'border-[var(--line)] bg-white text-[var(--ink)] hover:border-[var(--jade)] hover:bg-white'
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <Accordion className="mt-8 w-full space-y-4">
+            {days.map((day) => {
+              const visibleStops = day.stops.filter((stop) =>
+                matchesFilter(stop, activeFilter),
+              );
+
+              return (
+                <AccordionItem
+                  key={day.date}
+                  value={`day-${day.date}`}
+                  className="overflow-hidden rounded-[24px] border border-[var(--line)] bg-white/78 px-4 shadow-xs transition data-open:bg-white data-open:shadow-md sm:px-6"
+                >
+                  <AccordionTrigger className="w-full py-5 hover:no-underline sm:py-6">
+                    <div className="flex min-w-0 flex-1 items-center gap-3 pr-3 sm:gap-5">
+                      <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[var(--ink)] text-white sm:size-14">
                         <span className="text-center">
-                          <span className="block text-[10px] font-black uppercase tracking-[0.14em] opacity-65">
-                            Day {day.dayNumber} · {day.weekday}
-                          </span>
-                          <span className="mt-1 block font-serif text-2xl font-bold sm:text-3xl">
-                            {day.date}
-                          </span>
-                          <span className="mt-1 block text-[11px] font-semibold opacity-70">
+                          <span className="block text-[9px] font-black uppercase tracking-[0.14em] text-[var(--butter)]">
                             Sep
                           </span>
+                          <span className="block font-serif text-xl font-bold leading-none">
+                            {day.date}
+                          </span>
                         </span>
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                </div>
+                      </span>
+                      <span className="min-w-0 flex-1 text-left">
+                        <span className="block text-xs font-black uppercase tracking-[0.13em] text-[var(--vermilion)]">
+                          Day {day.dayNumber} · {day.weekday}
+                        </span>
+                        <span className="mt-1 block font-serif text-lg font-bold leading-snug text-[var(--ink)] sm:text-2xl">
+                          {day.title}
+                        </span>
+                        <span className="mt-1 block text-sm font-semibold leading-5 text-[var(--muted-ink)]">
+                          {day.area}
+                        </span>
+                      </span>
+                      <span className="hidden shrink-0 text-right sm:block">
+                        <span className="block text-sm font-black text-[var(--ink)]">
+                          {visibleStops.length}
+                        </span>
+                        <span className="block text-xs font-semibold text-[var(--muted-ink)]">
+                          {activeFilter === 'All' ? 'stops' : 'shown'}
+                        </span>
+                      </span>
+                    </div>
+                  </AccordionTrigger>
 
-                {days.map((day, dayIndex) => {
-                  const visibleStops = day.stops.filter((stop) =>
-                    matchesFilter(stop, activeFilter),
-                  );
-                  return (
-                    <TabsContent
-                      key={day.date}
-                      value={String(dayIndex)}
-                      className="pt-7"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-4">
-                        <div className="max-w-2xl">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="rounded-md bg-[var(--vermilion)]/10 px-2 py-1 text-xs font-black text-[var(--vermilion)]">
-                              Day {day.dayNumber} · Sept {day.date}
-                            </span>
-                            <span className="text-xs font-bold text-[var(--muted-ink)]">
-                              {day.area}
-                            </span>
-                          </div>
-                          <h3 className="mt-3 font-serif text-3xl font-bold sm:text-4xl">
-                            {day.title}
-                          </h3>
-                          <p className="mt-2 text-base leading-7 text-[var(--muted-ink)]">
-                            {day.subtitle}
-                          </p>
-                        </div>
-                        <span className="flex items-center gap-2 rounded-full border border-[var(--line)] bg-white/65 px-3 py-2 text-xs font-bold text-[var(--muted-ink)]">
-                          <TrainFront
-                            className="size-3.5 text-[var(--jade)]"
-                            aria-hidden="true"
+                  <AccordionContent className="border-t border-[var(--line)] pt-5 pb-6 sm:pt-6">
+                    <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
+                      <p className="max-w-3xl text-base leading-7 text-[var(--muted-ink)]">
+                        {day.subtitle}
+                      </p>
+                      <span className="flex w-fit items-center gap-2 rounded-full bg-[var(--paper)] px-3 py-2 text-xs font-bold text-[var(--muted-ink)] ring-1 ring-[var(--line)]">
+                        <TrainFront
+                          className="size-3.5 text-[var(--jade)]"
+                          aria-hidden="true"
+                        />
+                        {day.metro}
+                      </span>
+                    </div>
+
+                    {visibleStops.length > 0 ? (
+                      <div className="mt-6 grid items-stretch gap-4 lg:grid-cols-2">
+                        {visibleStops.map((stop, index) => (
+                          <StopCard
+                            key={`${day.date}-${stop.time}-${stop.title}`}
+                            stop={stop}
+                            index={index}
+                            total={visibleStops.length}
                           />
-                          {day.metro}
-                        </span>
+                        ))}
                       </div>
-                      {visibleStops.length > 0 ? (
-                        <div className="mt-7 space-y-4">
-                          {visibleStops.map((stop, index) => (
-                            <StopCard
-                              key={`${day.date}-${stop.time}-${stop.title}`}
-                              stop={stop}
-                              index={index}
-                              total={visibleStops.length}
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="mt-7 rounded-3xl border border-dashed border-[var(--line)] bg-white/45 px-6 py-12 text-center">
-                          <Sparkles
-                            className="mx-auto size-6 text-[var(--gold)]"
-                            aria-hidden="true"
-                          />
-                          <p className="mt-3 font-serif text-xl font-bold">
-                            No {activeFilter.toLowerCase()} stops this day.
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => setActiveFilter('All')}
-                            className="mt-3 text-sm font-bold text-[var(--jade)] underline underline-offset-4"
-                          >
-                            Show the full day
-                          </button>
-                        </div>
-                      )}
-                    </TabsContent>
-                  );
-                })}
-              </Tabs>
-            ) : (
-              <div className="mt-7">
-                <div className="mb-5">
-                  <h3 className="font-serif text-2xl font-bold sm:text-3xl">
-                    Full five-day overview
-                  </h3>
-                  <p className="mt-1 text-sm text-[var(--muted-ink)]">
-                    Expand a day to compare the complete route at a glance.
-                  </p>
-                </div>
-                <Accordion
-                  className="w-full space-y-3"
-                  defaultValue={['day-17']}
-                >
-                  {days.map((day) => {
-                    const visibleStops = day.stops.filter((stop) =>
-                      matchesFilter(stop, activeFilter),
-                    );
-                    return (
-                      <AccordionItem
-                        key={day.date}
-                        value={`day-${day.date}`}
-                        className="overflow-hidden rounded-2xl border border-[var(--line)] bg-white/80 px-4 py-1 transition data-[state=open]:bg-white data-[state=open]:shadow-sm"
-                      >
-                        <AccordionTrigger className="py-3 hover:no-underline">
-                          <div className="flex items-center gap-3 text-left">
-                            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--ink)] text-sm font-black text-white">
-                              {day.date}
-                            </span>
-                            <div>
-                              <span className="text-xs font-black uppercase tracking-wider text-[var(--vermilion)]">
-                                Day {day.dayNumber} · {day.weekday}
-                              </span>
-                              <h4 className="font-serif text-lg font-bold text-[var(--ink)]">
-                                {day.title}
-                              </h4>
-                              <p className="mt-0.5 text-xs font-semibold text-[var(--muted-ink)]">
-                                {visibleStops.length} shown · {day.area}
-                              </p>
-                            </div>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="pt-2 pb-4">
-                          {visibleStops.length > 0 ? (
-                            <div className="space-y-3">
-                              {visibleStops.map((stop) => (
-                                <div
-                                  key={`${day.date}-${stop.time}-${stop.title}`}
-                                  className="rounded-xl bg-[var(--paper)]/65 p-4"
-                                >
-                                  <div className="flex flex-wrap items-center justify-between gap-2">
-                                    <span className="text-xs font-black text-[var(--vermilion)]">
-                                      {stop.time}
-                                    </span>
-                                    <CategoryBadge stop={stop} />
-                                  </div>
-                                  <h5 className="mt-2 text-base font-bold text-[var(--ink)]">
-                                    {stop.title}
-                                  </h5>
-                                  <p className="mt-1 text-sm leading-6 text-[var(--muted-ink)]">
-                                    {stop.note}
-                                  </p>
-                                  <div className="mt-3 flex flex-wrap gap-2">
-                                    <XhsButton stop={stop} />
-                                    <RouteButton place={stop.place} />
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="py-5 text-center text-sm text-[var(--muted-ink)]">
-                              No {activeFilter.toLowerCase()} stops on this day.
-                            </p>
-                          )}
-                        </AccordionContent>
-                      </AccordionItem>
-                    );
-                  })}
-                </Accordion>
-              </div>
-            )}
+                    ) : (
+                      <div className="mt-6 rounded-2xl border border-dashed border-[var(--line)] bg-[var(--paper)]/55 px-5 py-9 text-center">
+                        <Sparkles
+                          className="mx-auto size-6 text-[var(--gold)]"
+                          aria-hidden="true"
+                        />
+                        <p className="mt-3 font-serif text-xl font-bold">
+                          No {activeFilter.toLowerCase()} stops this day.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setActiveFilter('All')}
+                          className="mt-3 min-h-10 text-sm font-bold text-[var(--jade)] underline underline-offset-4"
+                        >
+                          Show the full itinerary
+                        </button>
+                      </div>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
 
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--line)] pt-6">
-              <div className="flex max-w-lg items-start gap-2 text-xs leading-5 text-[var(--muted-ink)]">
-                <CheckCircle2
-                  className="mt-0.5 size-4 shrink-0 text-[var(--jade)]"
-                  aria-hidden="true"
-                />
-                <span>
-                  Tap <b>XHS</b> for photo references or <b>Amap</b> for live
-                  高德地图 navigation. Flight, hotel, and luggage milestones
-                  remain visible in the full view.
-                </span>
-              </div>
-              <RouteButton
-                place={currentDay.stops[0]?.place ?? hotel.chinese}
-                large
-              />
-            </div>
+          <div className="mt-7 flex items-start gap-2 rounded-2xl bg-[var(--jade)]/8 px-4 py-4 text-sm leading-6 text-[var(--muted-ink)] sm:px-5">
+            <CheckCircle2
+              className="mt-1 size-4 shrink-0 text-[var(--jade)]"
+              aria-hidden="true"
+            />
+            <span>
+              Tap <b>XHS</b> for photo references or <b>Amap</b> for live
+              高德地图 navigation. Flight, hotel, and luggage milestones are
+              included in the full view.
+            </span>
           </div>
         </div>
       </section>
